@@ -1,2 +1,6 @@
-const div = document.createElement('div');
-document.body.appendChild(div)
+class Game {
+  constructor(root) {
+    this.root = document.body;
+    
+  }
+}
