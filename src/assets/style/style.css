@@ -19,7 +19,7 @@
   padding: 20px;
 }
 
-.button-control {
+.button {
   background-color: #3F95E5;
   border: none;
   outline: none;
@@ -30,7 +30,7 @@
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
 }
 
-.button-control:not(:last-child) {
+.button:not(:last-child) {
   margin-right: 20px;
 }
 
@@ -38,12 +38,41 @@
   background-color: gray;
 }
 
+.game-count {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  font-weight: 600;
+  width: 400px;
+  margin: auto;
+  padding-bottom: 20px;
+  color: #3F95E5;
+}
+
 .game-field {
   width: 400px;
-  height: 400px;
+  height: 0;
   margin: auto;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
   background: #E5E5E5;
   border: 1px solid #3F95E5;
+  transition: all .4s ease-in;
+  overflow-y: hidden;
 }
 
+.show-game {
+  height: 400px;
+}
+
+.frame {
+  text-align: center;
+  padding: 20px 0;
+  color: #3F95E5;
+  font-weight: 700;
+}
+
+.level-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
