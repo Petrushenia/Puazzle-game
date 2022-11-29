@@ -1,13 +1,15 @@
-@import '~normalize.css';
-
-* {
+body {
+  background: #E5E5E5;
+}
+*,
+::before,
+::after {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 
 .game-wrapper {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: repeat(5, auto);
   max-width: 600px;
   margin: auto;
 }
@@ -27,15 +29,32 @@
   border-radius: 5px;
   color: #fff;
   cursor: pointer;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+  transition: all .3s;
+}
+
+.button:hover {
+  background: #2D6AA3;
+}
+
+.button-wrapper > .button:not(:nth-child(2)):hover {
+  background: #2D6AA3;
+}
+
+.level-button-active {
+  background: #2D6AA3;
 }
 
 .button:not(:last-child) {
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
 .stop-button {
-  background-color: gray;
+  background: #666666;
+}
+
+.stop-button:hover {
+  background: #9C9C9C;
 }
 
 .game-count {
@@ -43,26 +62,43 @@
   align-items: center;
   justify-content: space-evenly;
   font-weight: 600;
-  width: 400px;
   margin: auto;
   padding-bottom: 20px;
   color: #3F95E5;
 }
 
 .game-field {
-  width: 400px;
+  position: relative;
+  width: 0;
   height: 0;
   margin: auto;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
   background: #E5E5E5;
-  border: 1px solid #3F95E5;
+  border-radius: 10px;
   transition: all .4s ease-in;
-  overflow-y: hidden;
+  overflow: hidden;
 }
 
-.show-game {
-  height: 400px;
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  font-size: 22px;
+  color: #3F95E5;
+  border: 1px solid #3F95E5;
+  border-radius: 10px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  transition: background .3s;
+  cursor: pointer;
 }
+
+.cell:hover {
+  background: #87E1FF;
+}
+
 
 .frame {
   text-align: center;
@@ -75,4 +111,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+@media screen and (max-width: 480px) {
+  .cell {
+    width: 45px;
+    height: 45px;
+  }
 }
