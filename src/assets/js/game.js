@@ -106,11 +106,11 @@ class Game {
       }
       if (i) {
         this.gameField.appendChild(cell.element);
-        cell.element.addEventListener('click', () => {this.moveCell(i)})
+        this.setStyleCell(cell)
+        cell.element.addEventListener('click', () => this.moveCells(i))
       }
       this.cells.push(cell);
     }
-    this.setStyleCell()
   }
 
   setLevel = (e) => {
@@ -126,18 +126,36 @@ class Game {
     }
   }
   
-  setStyleCell = () => {
-    this.cells.forEach((cell, index) => {
-      if (index) {
-        cell.element.className = cell.class;
-        cell.element.style.left = `${cell.left * (cell.element.offsetWidth + 5) + 5}px`;
-        cell.element.style.top = `${cell.top * (cell.element.offsetWidth + 5) +  5}px`;
-        cell.element.textContent = cell.number;
-      }
-    })
+  setStyleCell = (cell) => {
+    cell.element.className = cell.class;
+    cell.element.style.left = `${cell.left * (cell.element.offsetWidth + 5) + 5}px`;
+    cell.element.style.top = `${cell.top * (cell.element.offsetWidth + 5) +  5}px`;
+    cell.element.textContent = cell.number;
   }
 
-  
+  moveCells = (index) => {
+    const cell = this.cells[index];
+    const leftDiv = Math.abs(this.cells[0].left - cell.left);
+    const topDiv = Math.abs(this.cells[0].top - cell.top)
+    const left = this.cells[0].left;
+    const top = this.cells[0].top;
+    if (leftDiv + topDiv > 1) {
+      return
+    }
+    this.cells[0].top = cell.top;
+    this.cells[0].left = cell.left;
+    cell.top = top;
+    cell.left = left
+    this.setStyleCell(cell)
+    
+  }
+
+  shuffleCells = (arr) => {
+    for (let i = arr.length - 1; i > 0; i--) {
+      let j = Math.floor(Math.random() * (i + 1))
+      [arr[i], arr[j]] = [arr[j], arr[i]]
+    }
+  }
 
   setStyleGameField = (level) => {
     this.gameField.style.height = `calc(65px * ${level} + 5px)`;
