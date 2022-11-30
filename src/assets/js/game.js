@@ -11,6 +11,12 @@ class Game {
 
     this.controlButtons = ['Shuffle and start', 'Stop', 'Save', 'Results',];
     this.levelButtons = ['3x3', '4x4', '5x5', '6x6', '7x7', '8x8',];
+    this.numbers = [...Array(64).keys()].map(num => num + 1)
+    this.moves = 0;
+    this.emptyCell = {
+      top: 0,
+      left: 0
+    }
     this.cells = [];
 
     this.levelBlock.addEventListener('click', this.toggleButtonClass)
@@ -65,6 +71,7 @@ class Game {
       btn.textContent = button;
       if (button == this.controlButtons[1]) {btn.classList.add('stop-button')};
       btn.classList.add('button');
+      btn.addEventListener('click', this.shuffle)
       this.controlBlock.appendChild(btn);
     })
   }
@@ -94,22 +101,21 @@ class Game {
 
   createCell = (level) => {
     this.resetGame()
-    for (let i = 0; i < Math.pow(level, 2); i++) {
+    this.cells.push(this.emptyCell)
+    for (let i = 1; i < Math.pow(level, 2); i++) {
       const left = i % level;
       const top = (i - left) / level;
       const cell = {
         top: top,
         left: left,
-        number: i,
+        number: this.numbers[i - 1],
         class: 'cell',
         element: document.createElement('div')
       }
-      if (i) {
         this.gameField.appendChild(cell.element);
         this.setStyleCell(cell)
-        cell.element.addEventListener('click', () => this.moveCells(i))
-      }
-      this.cells.push(cell);
+        cell.element.addEventListener('click', () => {this.moveCells(i); this.countMove()})
+        this.cells.push(cell);
     }
   }
 
@@ -133,29 +139,41 @@ class Game {
     cell.element.textContent = cell.number;
   }
 
+
   moveCells = (index) => {
     const cell = this.cells[index];
     const leftDiv = Math.abs(this.cells[0].left - cell.left);
     const topDiv = Math.abs(this.cells[0].top - cell.top)
     const left = this.cells[0].left;
     const top = this.cells[0].top;
-    if (leftDiv + topDiv > 1) {
-      return
-    }
+    if (leftDiv + topDiv > 1) {return}
     this.cells[0].top = cell.top;
     this.cells[0].left = cell.left;
     cell.top = top;
     cell.left = left
     this.setStyleCell(cell)
-    
   }
 
-  shuffleCells = (arr) => {
-    for (let i = arr.length - 1; i > 0; i--) {
-      let j = Math.floor(Math.random() * (i + 1))
-      [arr[i], arr[j]] = [arr[j], arr[i]]
+  shuffle = () => {
+    if (this.gameField.hasChildNodes()) {
+      const numbers = this.cells.map(cellNum => cellNum.number).filter(num => num != undefined)
+      for (let i = numbers.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+      }
+      this.gameField.childNodes.forEach((cell, index) => {
+        cell.textContent = numbers[index]
+      })
     }
   }
+
+  countMove = () => {
+    const movesBlock = this.gameCount.querySelector('.move').childNodes[1];
+    this.moves += 1
+    movesBlock.textContent = this.moves;
+  }
+
+  
 
   setStyleGameField = (level) => {
     this.gameField.style.height = `calc(65px * ${level} + 5px)`;
@@ -164,6 +182,9 @@ class Game {
 
   resetGame = () => {
     this.cells= []
+    this.moves = 0;
+    this.emptyCell.left = 0;
+    this.emptyCell.top = 0;
     this.gameField.innerHTML = '';
   }
 } 

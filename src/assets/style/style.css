@@ -91,9 +91,8 @@ body {
   border: 1px solid #3F95E5;
   border-radius: 10px;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-  transition: background .3s;
   cursor: pointer;
-  transition: left .3s, top .3s;
+  transition: left .3s, top .3s, background .3s;
 }
 
 .cell:hover {
