@@ -10,34 +10,30 @@ class Game {
     this.gameField = document.createElement('div');
     this.blur = document.createElement('div');
     this.frameSize = document.createElement('div');
-    //controls
+    //controls element
     this.controlButtons = ['Shuffle and start', 'Pause', 'Save', 'Results',];
     this.levelButtons = ['3x3', '4x4', '5x5', '6x6', '7x7', '8x8',];
     this.numbers = [...Array(64).keys()].map(num => num + 1);
-    this.emptyCell = {
-      top: 0,
-      left: 0
-    }
-    this.cells = [];
-    this.level = 0;
-    this.activeTimer = true;
-    this.activeGame = false;
-    this.isPause = false;
-    //counts
-    this.seconds = 1;
-    this.minutes = Math.floor(this.seconds / 60);
-    this.moves = 0;
-
+    //setting
     this.nIntervalId;
-    this.arrFunc = [this.startGame, this.pauseGame, this.startGame, this.stopGame];
+    this.options = {
+      emptyCell: {top: 0, left: 0},
+      cells: [],
+      level: 0,
+      activeGame: false,
+      activeTimer: true,
+      isPause: false,
+      seconds: 1,
+      moves: 1,
+    };
 
-
+    document.addEventListener('DOMContentLoaded', this.loadGame)
     this.levelBlock.addEventListener('click', this.toggleButtonClass);
   }
-
+  //create game element
   addGame = (e) => {
     this.addClassMainBlocks();
-    this.createButton();
+    this.createControlButton();
     this.createLevelButton();
     this.addFrameSize(e);
     this.addMainElement();
@@ -82,13 +78,14 @@ class Game {
     this.gameCount.appendChild(time);
   }
 
-  createButton = () => {
+  createControlButton = () => {
+    const arrFunc = [this.startGame, this.pauseGame, this.saveGame, this.loadGame];
     this.controlButtons.forEach((button, index) => {
       const btn = document.createElement('button');
       btn.textContent = button;
-      if (button == this.controlButtons[1]) {btn.classList.add('stop-button')};
+      if (button == this.controlButtons[1]) {btn.classList.add('pause-button')};
       btn.classList.add('button');
-      btn.addEventListener('click', this.arrFunc[index]);
+      btn.addEventListener('click', arrFunc[index]);
       this.controlBlock.appendChild(btn);
     })
   }
@@ -99,13 +96,15 @@ class Game {
       btn.textContent = button;
       btn.className = 'button';
       btn.addEventListener('click', (e) => {
-          if (!this.isPause) {
-            this.activeGame = false;
-            this.level = this.getLevel(e);
-            this.setStyleGameField(this.level);
+          if (!this.options.isPause) {
+            this.options.activeGame = false;
+            this.options.level = this.getLevel(e);
+            this.setStyleGameField(this.options.level);
             this.addFrameSize(e);
+            this.stopTimer();
+            this.removeBlur();
             this.resetGame();
-            this.createCell(this.level);
+            this.addCell(this.options.level);
           }
         }
       )
@@ -121,8 +120,8 @@ class Game {
     }
   }
 
-  createCell = (level) => {
-    this.resetGame()
+  addCell = (level) => {
+    this.resetGame();
     for (let i = 0; i < Math.pow(level, 2) - 1; i++) {
       const left = i % level;
       const top = (i - left) / level;
@@ -132,22 +131,21 @@ class Game {
         number: this.numbers[i],
         class: 'cell',
         element: document.createElement('div')
-      }
+      };
+      this.options.cells.push(cell);
       this.gameField.appendChild(cell.element);
       this.setStyleCell(cell);
       cell.element.addEventListener('click', () => {this.moveCells(i)});
-      this.cells.push(cell);
     }
-    this.emptyCell.top = level - 1;
-    this.emptyCell.left = level - 1;
-    this.cells.push(this.emptyCell);
+    this.options.emptyCell.top = level - 1;
+    this.options.emptyCell.left = level - 1;
     this.gameField.appendChild(this.blur);
   }
 
   getLevel = (e) => {
     return +e.target.textContent[0];
   }
-
+  //functional
   toggleButtonClass = (e) => {
     if (e.target.tagName === 'BUTTON') {
       this.levelBlock.childNodes.forEach(button => {
@@ -173,22 +171,23 @@ class Game {
   }
 
   moveCells = (index) => {
-    if (this.activeGame) {
-      const cell = this.cells[index];
-      const leftDiv = Math.abs(this.emptyCell.left - cell.left);
-      const topDiv = Math.abs(this.emptyCell.top - cell.top)
-      const left = this.emptyCell.left;
-      const top = this.emptyCell.top;
+    if (this.options.activeGame) {
+      const cell = this.options.cells[index];
+      const leftDiv = Math.abs(this.options.emptyCell.left - cell.left);
+      const topDiv = Math.abs(this.options.emptyCell.top - cell.top);
+      const left = this.options.emptyCell.left;
+      const top = this.options.emptyCell.top;
       if (leftDiv + topDiv > 1) {return}
-      this.emptyCell.top = cell.top;
-      this.emptyCell.left = cell.left;
+      this.options.emptyCell.top = cell.top;
+      this.options.emptyCell.left = cell.left;
       cell.top = top;
       cell.left = left;
       cell.element.style.top = `${cell.top * (cell.element.offsetWidth + 5) + 5}px`;
       cell.element.style.left = `${cell.left * (cell.element.offsetWidth + 5) + 5}px`;
       this.countMove();
-      this.checkGame();
+      this.checkGame(index);
     }else {
+      this.changeColor();
       this.addBlur();
       this.blur.textContent = 'Please click "Shuffle and start"';
     }
@@ -196,22 +195,20 @@ class Game {
 
   countMove = () => {
     const movesBlock = this.gameCount.querySelector('.move').childNodes[1];
-    this.moves += 1;
-    movesBlock.textContent = this.moves;
+    movesBlock.textContent = this.options.moves;
+    this.options.moves += 1;
   }
 
   shuffle = () => {
     if (this.gameField.hasChildNodes()) {
-      const numbers = this.cells.map(cellNum => cellNum.number).filter(num => num != undefined);
+      const numbers = this.options.cells.map(cellNum => cellNum.number).filter(num => num != undefined);
       for (let i = numbers.length - 1; i > 0; i--) {
         let j = Math.floor(Math.random() * (i + 1));
         [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
       }
-      this.cells.forEach((cell, index) => {
-        if (cell.number) {
+      this.options.cells.forEach((cell, index) => {
           cell.number = numbers[index];
           cell.element.textContent = cell.number;
-        }
       })
     }
   }
@@ -245,98 +242,149 @@ class Game {
     }
   }
 
-  resetGame = () => {
-    this.cells= [];
-    this.moves = 0;
-    this.seconds = 0;
-    this.minutes = Math.floor(this.seconds / 60)
-    this.emptyCell.left = 2;
-    this.emptyCell.top = 2;
-    this.gameField.innerHTML = '';
-    this.gameCount.querySelector('.move').childNodes[1].textContent = 0;
-    this.root.querySelector('.time').lastChild.textContent = ':00';
-    this.root.querySelector('.time').childNodes[1].textContent = '0';
-  }
-
   timer = () => {
-    const time = this.root.querySelector('.time');
+    const time = this.gameCount.querySelector('.time');
     const seconds = time.lastChild;
     const minutes = time.childNodes[1];
-    minutes.textContent = this.minutes;
-    if (this.seconds == 60) {
-      this.seconds = 0;
-      seconds.textContent = `:0${this.seconds}`;
-    }else if (this.seconds < 10) {
-      seconds.textContent = `:0${this.seconds}`;
+    this.options.seconds += 1;
+    this.getMinutes();
+    minutes.textContent = this.options.minutes;
+    if (this.options.seconds == 60) {
+      this.options.seconds = 0;
+      seconds.textContent = `:0${this.options.seconds}`;
+    }else if (this.options.seconds < 10) {
+      seconds.textContent = `:0${this.options.seconds}`;
     }else {
-      seconds.textContent = `:${this.seconds}`;
+      seconds.textContent = `:${this.options.seconds}`;
     }
-    this.seconds += 1;
-    this.minutes = this.minutes + Math.floor(this.seconds / 60);
+  }
+
+  getMinutes = () => {
+    this.options.minutes = (this.options.minutes + Math.floor((this.options.seconds) / 60)) || Math.floor((this.options.seconds) / 60);
   }
 
   showMassege = () => {
-    if (!this.activeGame) {
+    if (!this.options.activeGame) {
       this.blur.textContent = 'Please click on "Shuffle and start"';
     }else {
       this.blur.textContent = 'You\'r Win!!!';
     }
   }
 
+  changeColor = () => {
+    const startButton = this.controlBlock.firstChild;
+    startButton.classList.add('ch-color');
+    setTimeout(() => startButton.classList.remove('ch-color'), 2000)
+  }
+
   startGame = () => {
-    this.activeGame = true;
+    this.options.activeGame = true;
     this.resetGame();
     this.startTimer();
-    this.createCell(this.level);
+    this.addCell(this.options.level);
     this.shuffle();
     this.removeBlur(); 
   }
 
   pauseGame = (e) => {
-    if (!this.isPause) {
-      this.isPause = true;
-      this.addBlur();
-      this.stopTimer();
-      this.blur.textContent = 'Click continue';
-      e.target.textContent = 'Continue';
+    if (!this.options.isPause) {
+      if (!e) {
+        this.options.isPause = true;
+        this.controlBlock.querySelector('.pause-button').textContent = 'Continue';
+        this.controlBlock.querySelector('.pause-button').classList.add('.pause-button-active');
+        this.addBlur();
+        this.stopTimer();
+        this.blur.textContent = 'Click continue';
+      }else {
+        this.options.isPause = true;
+        this.addBlur();
+        this.stopTimer();
+        this.blur.textContent = 'Click continue';
+        e.target.textContent = 'Continue';
+        e.target.classList.add('pause-button-active');
+      }
     }else {
-      this.isPause = false;
+      this.options.isPause = false;
       this.removeBlur();
       this.startTimer();
       e.target.textContent = 'Pause';
+      e.target.classList.remove('pause-button-active');
     }
   }
 
-  checkGame = () => {
-    const isEnd = this.cells.every(cell => ((cell.top * this.level + cell.left + 1) == (cell.number || this.cells.length)))
+  checkGame = (i) => {
+    const isEnd = this.options.cells.every(cell => ((cell.top * this.options.level + cell.left + 1) == cell.number))
     if (isEnd) {
       this.finalGame();
     }
   }
 
   finalGame = () => {
+    const blur = this.gameField.querySelector('.blur');
     this.stopTimer();
     this.addBlur();
-    this.blur.textContent = 'You Win!!!';
-    this.activeGame = false;
+    this.blur.textContent = `You Win for ${this.options.moves - 1} moves, ${this.options.minutes} minutes and ${this.options.seconds} seconds.`;
+    this.options.activeGame = false;
   }
 
   startTimer = () => {
-    if (this.activeTimer) {
+    if (this.options.activeTimer) {
       this.nIntervalId = setInterval(this.timer, 1000);
-      this.activeTimer = false;
+      this.options.activeTimer = false;
     }
   }
 
   stopTimer = () => {
     clearInterval(this.nIntervalId);
     this.nIntervalId = null;
-    this.activeTimer = true;
+    this.options.activeTimer = true;
   }
 
-} 
+  saveGame = () => {
+    this.options.isPause = false;
+    this.setLocalStorage()
+  }
+
+  setLocalStorage = () => {
+    localStorage.setItem('options', JSON.stringify(this.options));
+    localStorage.setItem('cells', this.gameField.innerHTML);
+  }
+
+  loadGame = () => {
+    const pauseBtn = this.controlBlock.childNodes[1];
+    if (localStorage['options']) {
+      const res = JSON.parse(localStorage.getItem('options'));
+      this.options = res;
+    }
+    if (localStorage['cells']) {
+      this.gameField.innerHTML = localStorage['cells'];
+      this.setStyleGameField(this.options.level)
+      this.options.cells.forEach((cell, index) => {
+        cell.element = this.gameField.childNodes[index];
+        cell.element.addEventListener('click', () => this.moveCells(index));
+      })
+      pauseBtn.classList.add('pause-button-active')
+      this.timer();
+      this.countMove();
+      this.pauseGame();
+      this.gameField.append(this.blur);
+      
+    }
+  }
+
+  resetGame = () => {
+    this.options.cells= [];
+    this.options.moves = 1;
+    this.options.seconds = 0;
+    this.options.minutes = 0;
+    this.options.emptyCell.left = 2;
+    this.options.emptyCell.top = 2;
+    this.gameField.innerHTML = '';
+    this.gameCount.querySelector('.move').childNodes[1].textContent = 0;
+    this.root.querySelector('.time').lastChild.textContent = ':00';
+    this.root.querySelector('.time').childNodes[1].textContent = '0';
+  }
+}
 
 const game = new Game(document.body);
-
 game.addGame();
-
