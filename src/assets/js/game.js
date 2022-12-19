@@ -19,7 +19,7 @@ class Game {
     this.options = {
       emptyCell: {top: 0, left: 0},
       cells: [],
-      level: 0,
+      level: 4,
       activeGame: false,
       activeTimer: true,
       isPause: false,
@@ -201,7 +201,7 @@ class Game {
 
   shuffle = () => {
     if (this.gameField.hasChildNodes()) {
-      const numbers = this.options.cells.map(cellNum => cellNum.number).filter(num => num != undefined);
+      const numbers = this.options.cells.map(cell => cell.number);
       for (let i = numbers.length - 1; i > 0; i--) {
         let j = Math.floor(Math.random() * (i + 1));
         [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
@@ -368,11 +368,11 @@ class Game {
       this.countMove();
       this.pauseGame();
       this.gameField.append(this.blur);
-      
     }
   }
 
   resetGame = () => {
+    console.log(this.options)
     this.options.cells= [];
     this.options.moves = 1;
     this.options.seconds = 0;
