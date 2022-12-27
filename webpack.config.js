@@ -20,8 +20,8 @@ const optimization = () => {
 module.exports = {
   context: path.resolve(__dirname, 'src'),
   mode: 'development',
-  devtool: isDev ? 'inline-source-map' : 'source-map',
-   optimization: optimization(), 
+  devtool: isDev ? 'source-map' : 'inline-source-map',
+  optimization: optimization(), 
   entry: ['@babel/polyfill', './index.js'],
   output: {
     filename: '[name].[contenthash].js',

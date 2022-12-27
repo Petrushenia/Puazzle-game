@@ -35,7 +35,7 @@ class Game {
     this.addClassMainBlocks();
     this.createControlButton();
     this.createLevelButton();
-    this.addFrameSize(e);
+    this.addFrameSize(this.options.level);
     this.addMainElement();
   }
 
@@ -96,27 +96,26 @@ class Game {
       btn.textContent = button;
       btn.className = 'button';
       btn.addEventListener('click', (e) => {
-          if (!this.options.isPause) {
-            this.options.activeGame = false;
-            this.options.level = this.getLevel(e);
-            this.setStyleGameField(this.options.level);
-            this.addFrameSize(e);
-            this.stopTimer();
-            this.removeBlur();
-            this.resetGame();
-            this.addCell(this.options.level);
-          }
+        if (!this.options.isPause) {
+          this.options.activeGame = false;
+          this.getLevel(e);
+          this.setStyleGameField(this.options.level);
+          this.addFrameSize(this.options.level);
+          this.stopTimer();
+          this.removeBlur();
+          this.resetGame();
+          this.addCell(this.options.level);
         }
-      )
+      })
       this.levelBlock.appendChild(btn);
     })
   }
 
-  addFrameSize = (e) => {
-    if (!e) {
-      this.frameSize.textContent = 'Frame size: 0x0';
+  addFrameSize = (level) => {
+    if (!level) {
+      this.frameSize.textContent = `Frame size: 0x0`;
     }else {
-      this.frameSize.textContent = `Frame size: ${e.target.textContent}`;
+      this.frameSize.textContent = `Frame size: ${level}x${level}`;
     }
   }
 
@@ -143,7 +142,7 @@ class Game {
   }
 
   getLevel = (e) => {
-    return +e.target.textContent[0];
+    this.options.level = +e.target.textContent[0];
   }
   //functional
   toggleButtonClass = (e) => {
@@ -165,8 +164,10 @@ class Game {
   
   setStyleCell = (cell) => {
     cell.element.className = cell.class;
-    cell.element.style.left = `${cell.left * (cell.element.offsetWidth + 5) + 5}px`;
-    cell.element.style.top = `${cell.top * (cell.element.offsetWidth + 5) +  5}px`;
+    cell.element.style.width = `${(this.gameField.offsetWidth - (this.options.level * 10)) / this.options.level}px`;
+    cell.element.style.height = `${(this.gameField.offsetWidth - (this.options.level * 10)) / this.options.level}px`;
+    cell.element.style.left = `${cell.left * (cell.element.offsetWidth + 10) + 5}px`;
+    cell.element.style.top = `${cell.top * (cell.element.offsetWidth + 10) +  5}px`;
     cell.element.textContent = cell.number;
   }
 
@@ -182,8 +183,8 @@ class Game {
       this.options.emptyCell.left = cell.left;
       cell.top = top;
       cell.left = left;
-      cell.element.style.top = `${cell.top * (cell.element.offsetWidth + 5) + 5}px`;
-      cell.element.style.left = `${cell.left * (cell.element.offsetWidth + 5) + 5}px`;
+      cell.element.style.top = `${cell.top * (cell.element.offsetWidth + 10) + 5}px`;
+      cell.element.style.left = `${cell.left * (cell.element.offsetWidth + 10) + 5}px`;
       this.countMove();
       this.checkGame(index);
     }else {
@@ -214,32 +215,69 @@ class Game {
   }
 
   setStyleGameField = (level) => {
-    switch (level) {
-      case 3:
-        this.gameField.classList.remove('game-field-active-level-two', 'game-field-active-level-three', 'game-field-active-level-four', 'game-field-active-level-five', 'game-field-active-level-six');
-        this.gameField.classList.add('game-field-active-level-one');
-        break;
-      case 4:
-        this.gameField.classList.remove('game-field-active-level-one', 'game-field-active-level-three', 'game-field-active-level-four', 'game-field-active-level-five', 'game-field-active-level-six');
-        this.gameField.classList.add('game-field-active-level-two');
-        break;
-      case 5:
-        this.gameField.classList.remove('game-field-active-level-one', 'game-field-active-level-two', 'game-field-active-level-four', 'game-field-active-level-five', 'game-field-active-level-six');
-        this.gameField.classList.add('game-field-active-level-three');
-        break;
-      case 6:
-        this.gameField.classList.remove('game-field-active-level-one', 'game-field-active-level-two', 'game-field-active-level-three', 'game-field-active-level-five', 'game-field-active-level-six');
-        this.gameField.classList.add('game-field-active-level-four');
-        break;
-      case 7:
-        this.gameField.classList.remove('game-field-active-level-one', 'game-field-active-level-two', 'game-field-active-level-three', 'game-field-active-level-four', 'game-field-active-level-six');
-        this.gameField.classList.add('game-field-active-level-five');
-        break;
-      case 8:
-        this.gameField.classList.remove('game-field-active-level-one', 'game-field-active-level-two', 'game-field-active-level-three', 'game-field-active-level-four', 'game-field-active-level-five');
-        this.gameField.classList.add('game-field-active-level-six');
-        break;
-    }
+    this.gameField.style.height = `${this.gameField.offsetWidth}px`;
+    // switch (level) {
+    //   case 3:
+    //     this.gameField.classList.remove(
+    //       'game-field-active-level-two',
+    //       'game-field-active-level-three',
+    //       'game-field-active-level-four',
+    //       'game-field-active-level-five',
+    //       'game-field-active-level-six'
+    //     );
+    //     this.gameField.classList.add('game-field-active-level-one');
+    //     break;
+    //   case 4:
+    //     this.gameField.classList.remove(
+    //       'game-field-active-level-one',
+    //       'game-field-active-level-three',
+    //       'game-field-active-level-four',
+    //       'game-field-active-level-five',
+    //       'game-field-active-level-six'
+    //     );
+    //     this.gameField.classList.add('game-field-active-level-two');
+    //     break;
+    //   case 5:
+    //     this.gameField.classList.remove(
+    //       'game-field-active-level-one',
+    //       'game-field-active-level-two',
+    //       'game-field-active-level-four',
+    //       'game-field-active-level-five',
+    //       'game-field-active-level-six'
+    //     );
+    //     this.gameField.classList.add('game-field-active-level-three');
+    //     break;
+    //   case 6:
+    //     this.gameField.classList.remove(
+    //       'game-field-active-level-one',
+    //       'game-field-active-level-two',
+    //       'game-field-active-level-three',
+    //       'game-field-active-level-five',
+    //       'game-field-active-level-six'
+    //     );
+    //     this.gameField.classList.add('game-field-active-level-four');
+    //     break;
+    //   case 7:
+    //     this.gameField.classList.remove(
+    //       'game-field-active-level-one',
+    //       'game-field-active-level-two',
+    //       'game-field-active-level-three',
+    //       'game-field-active-level-four',
+    //       'game-field-active-level-six'
+    //     );
+    //     this.gameField.classList.add('game-field-active-level-five');
+    //     break;
+    //   case 8:
+    //     this.gameField.classList.remove(
+    //       'game-field-active-level-one',
+    //       'game-field-active-level-two',
+    //       'game-field-active-level-three',
+    //       'game-field-active-level-four',
+    //       'game-field-active-level-five'
+    //     );
+    //     this.gameField.classList.add('game-field-active-level-six');
+    //     break;
+    // }
   }
 
   timer = () => {
@@ -287,32 +325,24 @@ class Game {
   }
 
   pauseGame = (e) => {
+    const pauseBtn = this.controlBlock.querySelector('.pause-button');
     if (!this.options.isPause) {
-      if (!e) {
-        this.options.isPause = true;
-        this.controlBlock.querySelector('.pause-button').textContent = 'Continue';
-        this.controlBlock.querySelector('.pause-button').classList.add('.pause-button-active');
-        this.addBlur();
-        this.stopTimer();
-        this.blur.textContent = 'Click continue';
-      }else {
-        this.options.isPause = true;
-        this.addBlur();
-        this.stopTimer();
-        this.blur.textContent = 'Click continue';
-        e.target.textContent = 'Continue';
-        e.target.classList.add('pause-button-active');
-      }
+      this.options.isPause = true;
+      pauseBtn.textContent = 'Continue';
+      pauseBtn.classList.add('.pause-button-active');
+      this.blur.textContent = 'Click continue';
+      this.addBlur();
+      this.stopTimer();
     }else {
       this.options.isPause = false;
       this.removeBlur();
       this.startTimer();
-      e.target.textContent = 'Pause';
-      e.target.classList.remove('pause-button-active');
+      pauseBtn.textContent = 'Pause';
+      pauseBtn.classList.remove('pause-button-active');
     }
   }
 
-  checkGame = (i) => {
+  checkGame = () => {
     const isEnd = this.options.cells.every(cell => ((cell.top * this.options.level + cell.left + 1) == cell.number))
     if (isEnd) {
       this.finalGame();
@@ -353,26 +383,28 @@ class Game {
   loadGame = () => {
     const pauseBtn = this.controlBlock.childNodes[1];
     if (localStorage['options']) {
-      const res = JSON.parse(localStorage.getItem('options'));
-      this.options = res;
+      const saveOptions = JSON.parse(localStorage.getItem('options'));
+      this.options = saveOptions;
     }
     if (localStorage['cells']) {
       this.gameField.innerHTML = localStorage['cells'];
-      this.setStyleGameField(this.options.level)
       this.options.cells.forEach((cell, index) => {
         cell.element = this.gameField.childNodes[index];
         cell.element.addEventListener('click', () => this.moveCells(index));
+        this.setStyleCell(this.options.cells[index])
       })
+      this.setStyleGameField(this.options.level);
+
       pauseBtn.classList.add('pause-button-active')
       this.timer();
       this.countMove();
       this.pauseGame();
+      this.gameField.lastChild.remove()
       this.gameField.append(this.blur);
     }
   }
 
   resetGame = () => {
-    console.log(this.options)
     this.options.cells= [];
     this.options.moves = 1;
     this.options.seconds = 0;
